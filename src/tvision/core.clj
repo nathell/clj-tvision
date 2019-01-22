@@ -83,22 +83,17 @@
 
 ;; Global (!!!) keypress event
 
-(reg-fx
-  :key-pressed
-  (fn [{:keys [key] :as keystroke}]
-    (case key
-      :escape (magic/shutdown!)
-      \space (dispatch [:toggle-color])
-      :left (dispatch [:move-left])
-      :right (dispatch [:move-right])
-      :up (dispatch [:move-up])
-      :down (dispatch [:move-down])
-      nil)))
-
 (reg-event-fx
-  :press-key
-  (fn [_ [_ k]]
-    {:key-pressed k}))
+  :key-pressed
+  (fn [_ [_ {:keys [key] :as keystroke}]]
+    (case key
+      :escape {:shutdown true}
+      \space  {:dispatch [:toggle-color]}
+      :left   {:dispatch [:move-left]}
+      :right  {:dispatch [:move-right]}
+      :up     {:dispatch [:move-up]}
+      :down   {:dispatch [:move-down]}
+      {})))
 
 (defn run []
   (dispatch-sync [:init-db])

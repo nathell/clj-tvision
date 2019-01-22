@@ -5,7 +5,7 @@
     [clojure.core.async :as async]
     [lanterna.constants :as constants]
     [lanterna.screen :as screen]
-    [re-frame.core :refer [dispatch dispatch-sync]])
+    [re-frame.core :refer [dispatch dispatch-sync reg-fx]])
   (:import
     [com.googlecode.lanterna SGR TextCharacter]))
 
@@ -80,8 +80,10 @@
   (doseq [primitive (normalize-components app)]
     (render-primitive primitive)))
 
-(defn shutdown! []
-  (async/close! @input-events-ch))
+(reg-fx
+  :shutdown
+  (fn [_]
+    (async/close! @input-events-ch)))
 
 (defn run [app]
   (dispatch-sync [:init-db])
@@ -91,6 +93,6 @@
     (screen/redraw @screen)
     (when-let [event (async/<!! @input-events-ch)]
       (when-not (= event :next-tick)
-        (dispatch [:press-key event]))
+        (dispatch [:key-pressed event]))
       (recur)))
   (stop!))
